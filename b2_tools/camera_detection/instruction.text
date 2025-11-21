@@ -1,0 +1,60 @@
+# Deteccion con cámara ZED en ROS2
+
+`ZED_ROS2_WRAPPPER` using TensorRT accelerate !
+
+
+# Preparar el environment y Lanzar los scripts
+
+1. Conectarnos a la misma red del Go2
+
+2. Conectarnos al Go2 y lanza la cámara Zed (modo servidor)  
+  
+   ``` shell
+   ssh orin@192.168.59.135
+   cd zed_ws/
+   source install/setup.bash
+   ros2 launch zed_wrapper zed_camera.launch.py camera_model:=zed2i
+   ```
+   
+   El config que se debe modificar en el caso de querer cambiar algun paŕametro (calidad, frecuencia, profundidad) es: zed_ws/src/zed-  ros2-wrapper/zed_wrapper/config/common_stereo.yaml
+
+3. Activar el environment de Conda en todas las terminales del pc cliente
+
+   ``` shell
+   conda activate dihbu
+   ```
+
+4. Configurar environment ROS en todas las terminales del pc cliente
+
+   ``` shell
+   source /opt/ros/humble/setup.bash
+   ```
+5. Lanzar el launcher de Zed para Ros2 en modo cliente (IP del servidor):
+
+   ``` shell
+   cd dihbu_ws/
+   source install/setup.bash 
+   ros2 launch zed_wrapper zed_camera.launch.py camera_model:=zed2i stream_address:=192.168.59.135 stream_port:=30000
+   ```
+
+6. Lanzar el script de detección empleando Yolov11n y Zed Wrapper:
+
+   ``` shell
+   cd Documents/Dihbu_demo_vision/
+   python3 detector_dihbu_zed_ros.py 
+   ```
+
+7. Lanzar nodo de reconstrucción:
+   ```bash
+   cd retech_ws
+   source install/setup.bash
+   ros2 launch pointcloud_reconstruct pointcloud_reconstruct.launch.py
+   ```
+   
+8. Lanzar cliente rosbridge:
+   ```bash
+   cd ~/retech_ws/src/sw-ros-go2/rosbridge_comms/rosbridge_comms
+   python3 client.py
+   ```
+
+Si se necesita compilar algo, hacerlo fuera del environment para que use /usr/lib/python3

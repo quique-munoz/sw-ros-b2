@@ -1,0 +1,16 @@
+cat << 'EOF' > .gitignore
+# Colcon / CMake
+build/
+install/
+log/
+
+# Python
+__pycache__/
+*.pyc
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+.clangd/
+EOF

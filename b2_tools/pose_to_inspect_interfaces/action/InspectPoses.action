@@ -1,0 +1,19 @@
+# Goal - inspection parameters
+float64 min_pitch
+float64 max_pitch
+float64 min_yaw
+float64 max_yaw
+float64 max_pitch_step
+---
+
+# Result - indicates completion status
+bool success
+string message
+---
+
+# Feedback - provides current progress information
+int32 current_pose_index
+int32 total_poses
+float64 current_pitch
+float64 current_yaw
+bool path_completed

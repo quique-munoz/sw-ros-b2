@@ -1,0 +1,41 @@
+from launch import LaunchDescription
+from launch.actions import ExecuteProcess
+from launch.substitutions import PathJoinSubstitution
+from launch_ros.substitutions import FindPackageShare
+from launch_ros.actions import Node
+
+def generate_launch_description():
+    pkg = FindPackageShare('b2_description')
+    urdf_file = PathJoinSubstitution([pkg, 'urdf', 'b2_description.urdf'])
+
+    return LaunchDescription([
+        # 1) Start Gazebo Sim (GUI) with the empty world
+        #    (per docs: ros2 launch ros_gz_sim gz_sim.launch.py gz_args:=empty.sdf)
+        ExecuteProcess(
+            cmd=['ros2', 'launch', 'ros_gz_sim', 'gz_sim.launch.py', 'gz_args:=empty.sdf'],
+            output='screen'),
+
+        # 2) Spawn the URDF file as a model named "b2"
+        #    (per docs: ros2 run ros_gz_sim create ... -file <path>)
+        ExecuteProcess(
+            cmd=['ros2', 'run', 'ros_gz_sim', 'create',
+                 '-file', urdf_file,
+                 '-name', 'b2',
+                 '-allow_renaming', 'true'],
+            output='screen'),
+
+        # 3) Static TF: base_link -> base_footprint  (translation 0 0 0, identity rotation)
+        #    CLI format from tf2 tutorials (XYZ RPY then parent child)
+        Node(
+            package='tf2_ros',
+            executable='static_transform_publisher',
+            arguments=['0', '0', '0', '0', '0', '0', 'base_link', 'base_footprint'],
+            output='screen'),
+
+        # 4) One-shot Bool on /calibrated (ROS 2 equivalent of your latched publish)
+        ExecuteProcess(
+            cmd=['ros2', 'topic', 'pub', '--once',
+                 '/calibrated', 'std_msgs/msg/Bool', '{data: true}'],
+            output='screen'),
+    ])
+

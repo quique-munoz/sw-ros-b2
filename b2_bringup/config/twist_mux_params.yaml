@@ -1,0 +1,24 @@
+/twist_mux:
+  ros__parameters:
+    topics:
+      docking:
+        topic   : cmd_vel_dock
+        timeout : 0.25
+        priority: 11
+      smooth:
+        topic   : cmd_vel
+        timeout : 0.25
+        priority: 12
+      joy:
+        topic   : cmd_vel_teleop
+        timeout : 0.5
+        priority: 120
+      estop:
+        topic   : cmd_vel_estop
+        timeout : 0.5
+        priority: 250
+    locks:
+      e_stop:
+        topic   : e_stop
+        timeout : 0.0
+        priority: 250
