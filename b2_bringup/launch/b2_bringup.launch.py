@@ -157,8 +157,8 @@ def generate_launch_description():
         joy_estop_launch,
         b2_launch,
         base_footprint_broadcast_node,
-        radar_frame_broadcast_node,
-        pointcloud_accumulator_launch,
-        pointclod_to_laserscan_node,
+        # radar_frame_broadcast_node,
+        # pointcloud_accumulator_launch,
+        # pointclod_to_laserscan_node,
         # gscam_node,
     ])

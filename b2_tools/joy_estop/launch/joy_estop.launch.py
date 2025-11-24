@@ -61,10 +61,16 @@ def generate_launch_description():
         description='Stand down buttons'
     )
 
-    stand_up_buttons_arg = DeclareLaunchArgument(
-        'stand_up_buttons',
+    # stand_up_buttons_arg = DeclareLaunchArgument(
+        # 'stand_up_buttons',
+        # default_value='[9, 10, 11]',
+        # description='Stand up buttons'
+    # )
+
+    balance_stand_buttons_arg = DeclareLaunchArgument(
+        'balance_stand_buttons',
         default_value='[9, 10, 11]',
-        description='Stand up buttons'
+        description='Balance stand buttons'
     )
 
     # Create the node
@@ -80,7 +86,8 @@ def generate_launch_description():
             'reset_button': LaunchConfiguration('reset_button'),
             'damp_buttons': LaunchConfiguration('damp_buttons'),
             'stand_down_buttons': LaunchConfiguration('stand_down_buttons'),
-            'stand_up_buttons': LaunchConfiguration('stand_up_buttons'),
+            # 'stand_up_buttons': LaunchConfiguration('stand_up_buttons'),
+            'balance_stand_buttons': LaunchConfiguration('balance_stand_buttons'),
         }]
     )
 
@@ -91,6 +98,7 @@ def generate_launch_description():
         reset_button_arg,
         damp_buttons_arg,
         stand_down_buttons_arg,
-        stand_up_buttons_arg,
+        # stand_up_buttons_arg,
+        balance_stand_buttons_arg,
         joy_estop_node,
     ]) 

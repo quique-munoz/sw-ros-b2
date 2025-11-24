@@ -24,7 +24,8 @@ class JoyEStop : public rclcpp::Node
       this->declare_parameter("reset_button", 2);
       this->declare_parameter("damp_buttons", std::vector<long int>({7, 8}));
       this->declare_parameter("stand_down_buttons", std::vector<long int>({9, 10, 12}));
-      this->declare_parameter("stand_up_buttons", std::vector<long int>({9, 10, 11}));
+      // this->declare_parameter("stand_up_buttons", std::vector<long int>({9, 10, 11}));
+      this->declare_parameter("balance_stand_buttons", std::vector<long int>({9, 10, 11}));
       
       // Get parameter values
       input_topic = this->get_parameter("input_topic").as_string();
@@ -34,7 +35,8 @@ class JoyEStop : public rclcpp::Node
       reset_button = this->get_parameter("reset_button").as_int();
       damp_buttons = this->get_parameter("damp_buttons").as_integer_array();
       stand_down_buttons = this->get_parameter("stand_down_buttons").as_integer_array();
-      stand_up_buttons = this->get_parameter("stand_up_buttons").as_integer_array();
+      // stand_up_buttons = this->get_parameter("stand_up_buttons").as_integer_array();
+      balance_stand_buttons = this->get_parameter("balance_stand_buttons").as_integer_array();
       
       // Subscribe to joy topic
       joy_subscription_ = this->create_subscription<sensor_msgs::msg::Joy>(
@@ -96,10 +98,16 @@ class JoyEStop : public rclcpp::Node
       }
 
       // Check if all the stand up buttons are pressed
-      if (check_all_buttons_pressed(stand_up_buttons, msg)) 
+      // if (check_all_buttons_pressed(stand_up_buttons, msg)) 
+      // {
+      //   RCLCPP_WARN(this->get_logger(), "Trying to activate stand up mode");
+      //   call_mode_service("stand_up");
+      //   return;
+      // }
+      if (check_all_buttons_pressed(balance_stand_buttons, msg)) 
       {
-        RCLCPP_WARN(this->get_logger(), "Trying to activate stand up mode");
-        call_mode_service("stand_up");
+        RCLCPP_WARN(this->get_logger(), "Trying to activate balance stand mode");
+        call_mode_service("balance_stand");
         return;
       }
     }
@@ -180,7 +188,8 @@ class JoyEStop : public rclcpp::Node
     int reset_button;
     std::vector<long int> damp_buttons;
     std::vector<long int> stand_down_buttons;
-    std::vector<long int> stand_up_buttons;
+    // std::vector<long int> stand_up_buttons;
+    std::vector<long int> balance_stand_buttons;
 
     // Subscriptions
     rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr joy_subscription_;
