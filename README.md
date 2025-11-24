@@ -140,7 +140,7 @@ Este paquete se instala y se usa como dependencia en `b2_driver` y `b2_bringup`.
 * Codifica los comandos en JSON (`Move`, `StandUp`, `StandDown`, `BalanceStand`, `FreeWalk`, `ClassicWalk`, etc.) usando los `ROBOT_SPORT_API_ID_*`.
 * Se suscribe al estado de deporte `SportModeState`:
 
-  * Topic típico: `/sportmodestate` o `rt/sportmodestate`.
+  * Topic típico: `/sportmodestate` o `lf/sportmodestate`.
   * Campos relevantes: `mode`, `error_code`, `position`, `imu_state`, etc.
 
 ### Topics y servicios del driver
@@ -413,7 +413,7 @@ source install/setup.bash
 
   ```bash
   ros2 topic list | grep sport
-  ros2 topic echo rt/sportmodestate
+  ros2 topic echo sportmodestate
   ```
 
   Campos interesantes:
@@ -450,6 +450,19 @@ source install/setup.bash
   ```
 
   Y recompilar para ver en consola qué comandos están llegando al driver.
+
+* Flujo de estados para moverse
+  * B2 tumbado: mode 7
+  * Para levantarse:
+    * L2+A: se levanta (mode 3) y se queda de pie bloqueando articulaciones (mode 6 - *STAND_UP*). Debo pulsar START para poder moverlo (mode 9)
+    * L1+R1+Arriba: se levanta (mode 3) y se queda de pie listo para moverse (mode 9 - *BALANCE_STAND*)
+  * Una vez esta en modo *BALANCE_STAND* (mode 9)
+    * Mando UNITREE: Joystick izq para movimientos lineales, joystick dch para movimientos rotacionales.
+    * Mando PS5: Joystick izq + R1 para movimientos lineales lentos, Joystick dch + R1 para movimientos rotacionales lentos.
+  * Para tumbarse:
+    * Mando UNITREE: L2+A bloquea articulaciones (mode 6), L2+A se tumba (mode 5). Tras unos segundos pasa a mode 7 - *DAMP*
+    * Mando PS5: L1+R1+Abajo se tumba (mode 5). Tras unos segundos pasa a mode 7 - *DAMP*
+  * Para activar o desactivar e-stop: pulsar en el mando de PS5 O para activarlo, Δ para desactivarlo.
 
 ---
 
