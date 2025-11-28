@@ -1,0 +1,5 @@
+<library path="omni_unstuck_behavior_plugin">
+	<class name="omni_unstuck_behavior/OmniUnstuck" type="omni_unstuck_behavior::OmniUnstuck" base_class_type="nav2_core::Behavior">
+	<description>AAH</description>
+	</class>
+</library>

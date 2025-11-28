@@ -1,0 +1,5 @@
+<library path="unstuck_behavior_plugin">
+	<class name="unstuck_behavior/Unstuck" type="unstuck_behavior::Unstuck" base_class_type="nav2_core::Behavior">
+	<description>AAH</description>
+	</class>
+</library>

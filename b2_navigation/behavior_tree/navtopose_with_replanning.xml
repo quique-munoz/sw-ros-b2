@@ -1,0 +1,70 @@
+
+<root BTCPP_format="4"
+      main_tree_to_execute="MainTree">
+  <BehaviorTree ID="MainTree">
+    <!-- Navigate. If fail, recovery. If fail number_of_retries, fail everything (abort) -->
+    <!-- This is a timed recovery node, it will reset the retry count if the first child (navigation) has been running for longer than the time_allowance period. -->
+    <TimedRecoveryNode name="NavigateRecovery"
+                  number_of_retries="10"
+                  time_allowance="5.0">
+      <!-- Retry Planning-FollowPath until successful, with a maximum of 5 attempts -->
+      <RetryUntilSuccessful num_attempts="5">
+        <PipelineSequence name="NavigateWithReplanning">
+          <!-- Only check if we need replanning every 0.5 second (or whatever the hz is) -->
+          <!-- This rate controller can be removed if we want to check whenever possible -->
+          <!-- If the rate is too high, IsPathValid does not have time to process path -->
+          <RateController hz="1.0"
+                          name="RateControllerNavigation">
+            <Fallback name="ReactivePathComputation">
+              <!-- This checks if path is valid, or path is not updated -->
+              <Inverter name="PathNeedsNoUpdate">
+                <Fallback name="PathUpdateCheck">
+                  <Inverter name="PathIsInvalid">
+                    <IsPathValid name="IsPathValid" server_timeout="1000" path="{path}"/>
+                  </Inverter>
+                  <DistanceTraveled distance="2.0" global_frame="map" robot_base_frame="base_footprint"/>
+                  <GlobalUpdatedGoal name="GoalUpdated"/>
+                  <PathExpiringTimer name="PathTimerExpired" seconds="10" path="{path}"/>
+                  <!-- <IsFarFromPath name="IsFarFromPath" 
+                                path="{path}" 
+                                max_distance="1.0"
+                                max_angle="0.5236"/> -->
+                </Fallback>
+              </Inverter>
+              <!-- Compute path only if path not valid or path is too old -->
+              <ComputePathToPose goal="{goal}"
+                                path="{path}"
+                                planner_id="GridBased"
+                                name="ComputePathToPose"/>
+            </Fallback>
+          </RateController>
+          <!-- Follow path: fails if obstacle, activating recovery -->
+          <FollowPath path="{path}"
+                      name="FollowPath"
+                      controller_id="FollowPath"/>
+        </PipelineSequence>
+      </RetryUntilSuccessful>
+      <!-- Recovery sequence: clear costmaps, then wait 2 seconds -->
+      <Sequence name="RecoverySequence">
+        <ClearEntireCostmap name="ClearLocalCostmap-Subtree"
+                            service_name="local_costmap/clear_entirely_local_costmap"
+                            server_timeout="1000"/>
+        <ClearEntireCostmap name="ClearGlobalCostmap-Subtree"
+                            service_name="global_costmap/clear_entirely_global_costmap"
+                            server_timeout="1000"/>
+        <Wait wait_duration="1"
+              name="Wait"/>
+        <!-- We force success on unstuck so we always retry the main loop -->
+        <ForceSuccess>
+          <OmniUnstuck dist_to_travel="0.5" 
+                  linear_speed="0.5" 
+                  angular_speed="0.6" 
+                  time_allowance="10.0"
+                  server_timeout="2" />
+        </ForceSuccess>
+        
+      </Sequence>
+    </TimedRecoveryNode>
+  </BehaviorTree>
+
+</root>

@@ -1,0 +1,14 @@
+# Input parameters
+float64 distance
+float64 speed
+builtin_interfaces/Duration time_allowance
+
+---
+
+# Result definition
+builtin_interfaces/Duration total_elapsed_time
+
+---
+
+# Feedback definition
+float64 distance_traveled
