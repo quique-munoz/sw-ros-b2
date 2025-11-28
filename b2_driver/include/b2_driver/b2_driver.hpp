@@ -47,7 +47,8 @@ namespace b2_driver
 class B2Driver : public rclcpp::Node
 {
 public:
-  B2Driver();
+  B2Driver(const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
+
 
 private:
   // ==== Topic callbacks ====

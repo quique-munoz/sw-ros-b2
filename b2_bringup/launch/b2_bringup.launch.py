@@ -127,27 +127,63 @@ def generate_launch_description():
     )
 
     # Camera stream to ROS2
-    b2_eth_device = os.getenv('GO2_ETH_DEVICE', 'eth0')  # Default to eth0 if not set
-    gstream_config_string = 'gst-launch-1.0 udpsrc address=230.1.1.1 port=1720 multicast-iface=' + b2_eth_device + ' ! queue !  application/x-rtp, media=video, encoding-name=H264 ! rtph264depay ! h264parse ! avdec_h264 ! videoconvert'
-    gscam_node = Node(
+    # b2_eth_device = os.getenv('B2_ETH_DEVICE', 'eth0')  # Default to eth0 if not set
+    
+    # gstream_config_string = 'gst-launch-1.0 udpsrc address=230.1.1.1 port=1720 multicast-iface=' + b2_eth_device + ' ! queue !  application/x-rtp, media=video, encoding-name=H264 ! rtph264depay ! h264parse ! avdec_h264 ! videoconvert'
+    gstream_config_string = (
+        "rtspsrc location=rtsp://192.168.123.161:8551/front_video latency=0 ! "
+        "rtph264depay ! h264parse ! avdec_h264 ! videoconvert"
+    )
+
+    front_camera_node = Node(
         package='gscam',
         executable='gscam_node',
+        name='b2_front_camera',
         output='screen',
-        
         parameters=[{
             'gscam_config': gstream_config_string,
-            'frame_id': 'Head_upper',
+            'frame_id': 'f_oc_link',
             # 'image_encoding': 'rgb8',
             # 'camera_info_url': 'file://' + os.path.join(pkg_share_b2, 'config', 'camera_info.yaml'),
             # 'camera_name': 'internal_camera',
             # 'sync_sink': False,
         }],
         remappings=[    # Remaps to rename to internal camera
-            ('/camera/image_raw', '/camera/internal_camera/image_raw'),
-            ('/camera/camera_info', '/camera/internal_camera/camera_info'),
-            ('/camera/image_raw/compressed', '/camera/internal_camera/image_raw/compressed'),
-            ('/camera/image_raw/theora', '/camera/internal_camera/image_raw/theora'),
-            ('/camera/image_raw/compressedDepth', '/camera/internal_camera/image_raw/compressedDepth'),
+            ('/camera/image_raw', '/b2/front_camera/image_raw'),
+            ('/camera/camera_info', '/b2/front_camera/camera_info'),
+            ('/camera/image_raw/compressed', '/b2/front_camera/image_raw/compressed'),
+            ('/camera/image_raw/compressedDepth', '/b2/front_camera/image_raw/compressedDepth'),
+            ('/camera/image_raw/ffmpeg', '/b2/front_camera/image_raw/ffmpeg'),
+            ('/camera/image_raw/theora', '/b2/front_camera/image_raw/theora'),
+        ]
+    )
+
+    # gstream_config_string = 'gst-launch-1.0 udpsrc address=230.1.1.1 port=1720 multicast-iface=' + b2_eth_device + ' ! queue !  application/x-rtp, media=video, encoding-name=H264 ! rtph264depay ! h264parse ! avdec_h264 ! videoconvert'
+    gstream_config_string_rear = (
+        "rtspsrc location=rtsp://192.168.123.161:8552/back_video latency=0 ! "
+        "rtph264depay ! h264parse ! avdec_h264 ! videoconvert"
+    )
+
+    rear_camera_node = Node(
+        package='gscam',
+        executable='gscam_node',
+        name='b2_rear_camera',
+        output='screen',
+        parameters=[{
+            'gscam_config': gstream_config_string_rear,
+            'frame_id': 'r_oc_link',
+            # 'image_encoding': 'rgb8',
+            # 'camera_info_url': 'file://' + os.path.join(pkg_share_b2, 'config', 'camera_info.yaml'),
+            # 'camera_name': 'internal_camera',
+            # 'sync_sink': False,
+        }],
+        remappings=[    # Remaps to rename to internal camera
+            ('/camera/image_raw', '/b2/rear_camera/image_raw'),
+            ('/camera/camera_info', '/b2/rear_camera/camera_info'),
+            ('/camera/image_raw/compressed', '/b2/rear_camera/image_raw/compressed'),
+            ('/camera/image_raw/compressedDepth', '/b2/rear_camera/image_raw/compressedDepth'),
+            ('/camera/image_raw/ffmpeg', '/b2/rear_camera/image_raw/ffmpeg'),
+            ('/camera/image_raw/theora', '/b2/rear_camera/image_raw/theora'),
         ]
     )
 
@@ -160,5 +196,6 @@ def generate_launch_description():
         # radar_frame_broadcast_node,
         # pointcloud_accumulator_launch,
         # pointclod_to_laserscan_node,
-        # gscam_node,
+        front_camera_node,
+        rear_camera_node,
     ])

@@ -2,18 +2,41 @@
 
 from launch import LaunchDescription
 from launch_ros.actions import Node
+from launch_ros.actions import ComposableNodeContainer, Node
+from launch_ros.descriptions import ComposableNode
 
 
 def generate_launch_description():
 
     # Nodo principal del driver del B2
-    b2_driver_node = Node(
+    # b2_driver_node = Node(
+    #     package='b2_driver',
+    #     executable='b2_driver_node',   
+    #     name='b2_driver',
+    #     namespace='',
+    #     output='screen',
+    #     remappings=[('/cmd_vel', '/b2/cmd_vel')],
+    # )
+
+    composable_nodes = []
+
+    composable_node = ComposableNode(
         package='b2_driver',
-        executable='b2_driver_node',   
+        plugin='b2_driver::B2Driver',
         name='b2_driver',
         namespace='',
-        output='screen',
         remappings=[('/cmd_vel', '/b2/cmd_vel')],
+
+    )
+    composable_nodes.append(composable_node)
+
+    container = ComposableNodeContainer(
+        name='b2_container',
+        namespace='',
+        package='rclcpp_components',
+        executable='component_container',
+        composable_node_descriptions=composable_nodes,
+        output='screen',
     )
 
     # Nodo que convierte pointcloud -> laserscan
@@ -39,7 +62,8 @@ def generate_launch_description():
     # )
 
     ld = LaunchDescription()
-    ld.add_action(b2_driver_node)
+    # ld.add_action(b2_driver_node)
+    ld.add_action(container)
     # ld.add_action(pointcloud_to_laserscan_node)
 
     return ld

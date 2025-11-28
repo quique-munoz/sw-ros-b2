@@ -1,16 +1,4 @@
-# Copyright (c) 2024 Intelligent Robotics Lab (URJC)
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# ROS2 Launch file
 
 import os
 
@@ -31,7 +19,7 @@ def generate_launch_description():
     declare_lidar_cmd = DeclareLaunchArgument(
         'lidar',
         default_value='False',
-        description='Launch hesai lidar driver'
+        description='Launch RoboSense RS16 lidar driver'
     )
 
     declare_realsense_cmd = DeclareLaunchArgument(
@@ -66,13 +54,13 @@ def generate_launch_description():
 
     # Create lidar command only if package is available
     try:
-        hesai_ros_driver_path = get_package_share_directory('hesai_ros_driver')
+        rslidar_sdk_path = get_package_share_directory('rslidar_sdk')
     except:
-        hesai_ros_driver_path = "/error/hesai_ros_driver/not_found"
+        rslidar_sdk_path = "/error/rslidar_sdk/not_found"
 
     lidar_cmd = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([os.path.join(
-            hesai_ros_driver_path,
+            rslidar_sdk_path,
             'launch/'), 'start.py']),
         condition=IfCondition(PythonExpression([lidar]))
     )
@@ -119,12 +107,12 @@ def generate_launch_description():
     )
 
     ld = LaunchDescription()
-    # ld.add_action(declare_lidar_cmd)
+    ld.add_action(declare_lidar_cmd)
     # ld.add_action(declare_realsense_cmd)
     # ld.add_action(declare_rviz_cmd)
     ld.add_action(robot_description_cmd)
     # ld.add_action(declare_zed_cmd)
-    # ld.add_action(lidar_cmd)
+    ld.add_action(lidar_cmd)
     # ld.add_action(realsense_cmd)
     ld.add_action(driver_cmd)
     # ld.add_action(zed_cmd)

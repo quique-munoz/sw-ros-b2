@@ -5,8 +5,10 @@
 namespace b2_driver
 {
 
-B2Driver::B2Driver()
-: Node("b2_driver"),
+
+B2Driver::B2Driver(
+  const rclcpp::NodeOptions & options)
+: Node("b2_driver", options),
   tf_broadcaster_(this),
   sport_client_(this),
   move_cooldown_time_s_(1.0)
@@ -447,11 +449,6 @@ void B2Driver::callEuler(float roll, float pitch, float yaw)
 
 }  // namespace b2_driver
 
-int main(int argc, char ** argv)
-{
-  rclcpp::init(argc, argv);
-  auto node = std::make_shared<b2_driver::B2Driver>();
-  rclcpp::spin(node);
-  rclcpp::shutdown();
-  return 0;
-}
+#include "rclcpp_components/register_node_macro.hpp"
+RCLCPP_COMPONENTS_REGISTER_NODE(b2_driver::B2Driver)
+
