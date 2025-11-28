@@ -18,7 +18,7 @@ def generate_launch_description():
 
     declare_lidar_cmd = DeclareLaunchArgument(
         'lidar',
-        default_value='False',
+        default_value='True',
         description='Launch RoboSense RS16 lidar driver'
     )
 
@@ -108,14 +108,14 @@ def generate_launch_description():
 
     ld = LaunchDescription()
     ld.add_action(declare_lidar_cmd)
-    # ld.add_action(declare_realsense_cmd)
-    # ld.add_action(declare_rviz_cmd)
+    ld.add_action(declare_realsense_cmd)
+    ld.add_action(declare_rviz_cmd)
     ld.add_action(robot_description_cmd)
-    # ld.add_action(declare_zed_cmd)
+    ld.add_action(declare_zed_cmd)
     ld.add_action(lidar_cmd)
-    # ld.add_action(realsense_cmd)
+    ld.add_action(realsense_cmd)
     ld.add_action(driver_cmd)
-    # ld.add_action(zed_cmd)
+    ld.add_action(zed_cmd)
     ld.add_action(rviz_cmd)
 
     return ld
