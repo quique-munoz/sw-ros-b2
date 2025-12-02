@@ -44,24 +44,14 @@ def generate_launch_description():
         ament_index_python.packages.get_package_share_directory('ublox_gps'),
         'config'
     )
-    params = os.path.join(config_directory, 'zed_f9p.yaml')
-
-    # Nodo U-blox frontal
-    front_ublox = launch_ros.actions.Node(
-        package='ublox_gps',
-        executable='ublox_gps_node',
-        name='front_ublox',
-        namespace='front_gnss',          
-        output='both',
-        parameters=[
-            params,
-            {
-                'device': '/dev/tty_gps1',
-                'frame_id': 'front_gnss',
-            }
-        ]
-    )
-
+    params_front = os.path.join(config_directory, 'zed_f9p.yaml')
+    params_back = os.path.join(config_directory, 'zed_f9p.yaml')
+    front_ublox = launch_ros.actions.Node(package='ublox_gps',
+                                             executable='ublox_gps_node',
+                                             name='front_ublox',
+                                             namespace='front_gnss', 
+                                             output='both',
+                                             parameters=[params_front])
     # Nodo U-blox trasero
     back_ublox = launch_ros.actions.Node(
         package='ublox_gps',
@@ -69,14 +59,9 @@ def generate_launch_description():
         name='back_ublox',
         namespace='back_gnss',
         output='both',
-        parameters=[
-            params,
-            {
-                'device': '/dev/tty_gps2',   
-                'frame_id': 'back_gnss',
-            }
-        ]
+        parameters=[params_back]
     )
+    
     shutdown_on_front_exit = launch.actions.RegisterEventHandler(
         event_handler=launch.event_handlers.OnProcessExit(
             target_action=front_ublox,

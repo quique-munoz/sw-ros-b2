@@ -196,6 +196,6 @@ def generate_launch_description():
         radar_frame_broadcast_node,
         # pointcloud_accumulator_launch,
         # pointclod_to_laserscan_node,
-        # front_camera_node,
-        # rear_camera_node,
+        front_camera_node,
+        rear_camera_node,
     ])
