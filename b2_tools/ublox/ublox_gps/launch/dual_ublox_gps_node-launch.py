@@ -44,20 +44,18 @@ def generate_launch_description():
         ament_index_python.packages.get_package_share_directory('ublox_gps'),
         'config'
     )
-    params_front = os.path.join(config_directory, 'zed_f9p.yaml')
-    params_back = os.path.join(config_directory, 'zed_f9p.yaml')
+    params_front = os.path.join(config_directory, 'zed_f9p_front.yaml')
+    params_back = os.path.join(config_directory, 'zed_f9p_back.yaml')
     front_ublox = launch_ros.actions.Node(package='ublox_gps',
                                              executable='ublox_gps_node',
-                                             name='front_ublox',
-                                             namespace='front_gnss', 
+                                             name='front_gnss',
                                              output='both',
                                              parameters=[params_front])
     # Nodo U-blox trasero
     back_ublox = launch_ros.actions.Node(
         package='ublox_gps',
         executable='ublox_gps_node',
-        name='back_ublox',
-        namespace='back_gnss',
+        name='back_gnss',
         output='both',
         parameters=[params_back]
     )
