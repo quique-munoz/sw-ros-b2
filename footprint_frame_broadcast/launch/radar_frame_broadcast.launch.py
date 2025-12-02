@@ -10,7 +10,7 @@ def generate_launch_description():
             name='footprint_frame_broadcast',
             parameters=[{
                 'source_frame': 'base_footprint',
-                'target_frame': 'radar',
+                'target_frame': 'lidar_link',
                 'output_parent_frame': 'base_footprint',
                 'output_child_frame': 'radar_flat',
                 'output_frame_height': 0.0,

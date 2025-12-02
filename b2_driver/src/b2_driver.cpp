@@ -13,13 +13,11 @@ B2Driver::B2Driver(
   sport_client_(this),
   move_cooldown_time_s_(1.0)
 {
-  // QoS para odom (transient local como en go2_driver)
   rclcpp::QoS qos_profile(rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_default));
   qos_profile.durability(RMW_QOS_POLICY_DURABILITY_TRANSIENT_LOCAL);
 
   // === Publishers ===
   error_code_pub_ = create_publisher<std_msgs::msg::String>("error_code", 10);
-  lidar_pub_ = create_publisher<sensor_msgs::msg::PointCloud2>("pointcloud", 10);
   joint_state_pub_ = create_publisher<sensor_msgs::msg::JointState>("joint_states", 10);
   odom_pub_ = create_publisher<nav_msgs::msg::Odometry>("odom", qos_profile);
   imu_pub_ = create_publisher<unitree_go::msg::IMUState>("imu", 10);
@@ -33,13 +31,13 @@ B2Driver::B2Driver(
     "lowstate", 10,
     std::bind(&B2Driver::lowStateCallback, this, std::placeholders::_1));
 
-  lidar_sub_ = create_subscription<sensor_msgs::msg::PointCloud2>(
-    "/utlidar/cloud", 10,
-    std::bind(&B2Driver::lidarCallback, this, std::placeholders::_1));
-
   pose_sub_ = create_subscription<geometry_msgs::msg::PoseStamped>(
     "/utlidar/robot_pose", 10,
     std::bind(&B2Driver::poseCallback, this, std::placeholders::_1));
+
+  odom_state_sub_ = create_subscription<unitree_go::msg::SportModeState>(
+    "/odommodestate", 10,  // si prefieres usar el low-frequency: "/lf/odommodestate"
+    std::bind(&B2Driver::odomStateCallback, this, std::placeholders::_1));
 
   joy_sub_ = create_subscription<sensor_msgs::msg::Joy>(
     "joy", 10,
@@ -108,6 +106,30 @@ B2Driver::B2Driver(
 // Callbacks de tópicos
 // ============================================================================
 
+void B2Driver::odomStateCallback(const unitree_go::msg::SportModeState::SharedPtr msg)
+{
+  // Construimos un PoseStamped equivalente a /utlidar/robot_pose
+  auto pose_msg = std::make_shared<geometry_msgs::msg::PoseStamped>();
+
+  pose_msg->header.stamp = now();
+  pose_msg->header.frame_id = "odom";  // el frame "mundo" de la odometría del B2
+
+  // Posición: viene directamente en el mensaje
+  pose_msg->pose.position.x = msg->position[0];
+  pose_msg->pose.position.y = msg->position[1];
+  pose_msg->pose.position.z = msg->position[2];
+
+  // Orientación: usamos el quaternion tal y como viene
+  // Por los valores que has enseñado, el orden es [w, x, y, z]
+  pose_msg->pose.orientation.w = msg->imu_state.quaternion[0];
+  pose_msg->pose.orientation.x = msg->imu_state.quaternion[1];
+  pose_msg->pose.orientation.y = msg->imu_state.quaternion[2];
+  pose_msg->pose.orientation.z = msg->imu_state.quaternion[3];
+
+  // Reutilizamos toda la lógica que ya tenías en poseCallback
+  poseCallback(pose_msg);
+}
+
 void B2Driver::cmdVelCallback(const geometry_msgs::msg::Twist::SharedPtr msg)
 {
   if ((now() - last_move_command_time_).seconds() > move_cooldown_time_s_) {
@@ -159,13 +181,6 @@ void B2Driver::lowStateCallback(const unitree_go::msg::LowState::SharedPtr msg)
   joint_state_pub_->publish(joint_state);
 }
 
-void B2Driver::lidarCallback(const sensor_msgs::msg::PointCloud2::SharedPtr msg)
-{
-  auto cloud = *msg;
-  cloud.header.stamp = now();
-  cloud.header.frame_id = "radar";  
-  lidar_pub_->publish(cloud);
-}
 
 void B2Driver::poseCallback(const geometry_msgs::msg::PoseStamped::SharedPtr msg)
 {
@@ -177,20 +192,23 @@ void B2Driver::poseCallback(const geometry_msgs::msg::PoseStamped::SharedPtr msg
   tf_msg.transform.translation.x = msg->pose.position.x;
   tf_msg.transform.translation.y = msg->pose.position.y;
   tf_msg.transform.translation.z = msg->pose.position.z + 0.025;
-
-  tf_msg.transform.rotation = msg->pose.orientation;
-
+  tf_msg.transform.rotation.x = msg->pose.orientation.x;
+  tf_msg.transform.rotation.y = msg->pose.orientation.y;
+  tf_msg.transform.rotation.z = msg->pose.orientation.z;
+  tf_msg.transform.rotation.w = msg->pose.orientation.w;
   tf_broadcaster_.sendTransform(tf_msg);
 
   nav_msgs::msg::Odometry odom;
   odom.header.stamp = now();
   odom.header.frame_id = "odom";
   odom.child_frame_id = "base_link";
-
   odom.pose.pose.position = msg->pose.position;
   odom.pose.pose.position.z += 0.025;
   odom.pose.pose.orientation = msg->pose.orientation;
-
+  odom.pose.pose.orientation.x = msg->pose.orientation.x;
+  odom.pose.pose.orientation.y = msg->pose.orientation.y;
+  odom.pose.pose.orientation.z = msg->pose.orientation.z;
+  odom.pose.pose.orientation.w = msg->pose.orientation.w;
   odom_pub_->publish(odom);
 }
 

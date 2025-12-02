@@ -49,7 +49,7 @@ def generate_launch_description():
             )
         ),
         launch_arguments={
-            'lidar': "False",      
+            'lidar': "True",      
             'realsense': "False",   
             'rviz': "False",
             'zed': "False"        
@@ -81,7 +81,7 @@ def generate_launch_description():
             name='radar_footprint_frame_broadcast',
             parameters=[{
                 'source_frame': 'base_footprint',
-                'target_frame': 'radar',
+                'target_frame': 'lidar_link',
                 'output_parent_frame': 'base_footprint',
                 'output_child_frame': 'radar_flat',
                 'output_frame_height': 0.0,
@@ -93,24 +93,24 @@ def generate_launch_description():
         )
     
     # Pointcloud accumulator
-    pointcloud_accumulator_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource( 
-            os.path.join(
-                pkg_share_pointcloud_accumulator,
-                "launch/pointcloud_accumulator.launch.py",
-            )
-        )
-    )
+    # pointcloud_accumulator_launch = IncludeLaunchDescription(
+    #     PythonLaunchDescriptionSource( 
+    #         os.path.join(
+    #             pkg_share_pointcloud_accumulator,
+    #             "launch/pointcloud_accumulator.launch.py",
+    #         )
+    #     )
+    # )
 
     # Pointcloud to laserscan of the accumulated pointcloud
     pointclod_to_laserscan_node = Node(
         package='pointcloud_to_laserscan',
         executable='pointcloud_to_laserscan_node',
-        name='pointcloud_to_laserscan_accumulated',
+        name='pointcloud_to_laserscan',
         namespace='',
         output='screen',
-        remappings=[('/cloud_in', '/pointcloud_accumulated'),
-                    ('/scan', '/scan_accumulated')
+        remappings=[('/cloud_in', '/pointcloud'),
+                    ('/scan', '/scan')
         ],
         parameters=[{
                 'target_frame': 'radar_flat',
@@ -192,10 +192,10 @@ def generate_launch_description():
         twist_mux_node,
         joy_estop_launch,
         b2_launch,
-        # base_footprint_broadcast_node,
-        # radar_frame_broadcast_node,
+        base_footprint_broadcast_node,
+        radar_frame_broadcast_node,
         # pointcloud_accumulator_launch,
         # pointclod_to_laserscan_node,
-        front_camera_node,
-        rear_camera_node,
+        # front_camera_node,
+        # rear_camera_node,
     ])

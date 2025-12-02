@@ -9,7 +9,7 @@ amcl:
     base_frame_id: "base_footprint"
     odom_frame_id: "odom"
     global_frame_id: "map"
-    scan_topic: scan_accumulated
+    scan_topic: scan
     map_topic: map
     do_beamskip: false
     beam_skip_distance: 0.5
@@ -267,11 +267,11 @@ local_costmap:
         enabled: True
         tf_filter_tolerance: 0.2
         inf_is_valid: True
-        observation_sources: scan_accumulated
+        observation_sources: scan
         min_obstacle_height: -2.0
         max_obstacle_height: 2.0
-        scan_accumulated:
-          topic: /scan_accumulated
+        scan:
+          topic: /scan
           clearing: True
           marking: True
           data_type: "LaserScan"
@@ -301,12 +301,12 @@ global_costmap:
         enabled: True
         tf_filter_tolerance: 0.2
         inf_is_valid: True
-        observation_sources: scan_accumulated
+        observation_sources: scan
         footprint_clearing_enabled: true
         min_obstacle_height: -2.0
         max_obstacle_height: 2.0
-        scan_accumulated:
-          topic: /scan_accumulated
+        scan:
+          topic: /scan
           clearing: True
           marking: True
           data_type: "LaserScan"

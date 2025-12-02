@@ -59,7 +59,7 @@ private:
   void lidarCallback(const sensor_msgs::msg::PointCloud2::SharedPtr msg);
   void poseCallback(const geometry_msgs::msg::PoseStamped::SharedPtr msg);
   void joyCallback(const sensor_msgs::msg::Joy::SharedPtr msg);
-
+  void odomStateCallback(const unitree_go::msg::SportModeState::SharedPtr msg);
   // ==== Service handlers ====
   void handleMode(
     const std::shared_ptr<rmw_request_id_t> request_header,
@@ -129,7 +129,7 @@ private:
   rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr lidar_sub_;
   rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr pose_sub_;
   rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr joy_sub_;
-
+  rclcpp::Subscription<unitree_go::msg::SportModeState>::SharedPtr odom_state_sub_;
   // ==== Services ====
   rclcpp::Service<b2_interfaces::srv::Mode>::SharedPtr mode_srv_;
   rclcpp::Service<b2_interfaces::srv::Euler>::SharedPtr euler_srv_;
