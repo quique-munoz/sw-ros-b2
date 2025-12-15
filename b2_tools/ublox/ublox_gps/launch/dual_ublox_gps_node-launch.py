@@ -59,7 +59,7 @@ def generate_launch_description():
         output='both',
         parameters=[params_back]
     )
-    
+
     shutdown_on_front_exit = launch.actions.RegisterEventHandler(
         event_handler=launch.event_handlers.OnProcessExit(
             target_action=front_ublox,

@@ -13,14 +13,20 @@ B2Driver::B2Driver(
   sport_client_(this),
   move_cooldown_time_s_(1.0)
 {
+  this->declare_parameter<std::string>("imu_frame_id", "imu_link");
+  imu_frame_id_ = this->get_parameter("imu_frame_id").as_string();
+  
   rclcpp::QoS qos_profile(rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_default));
   qos_profile.durability(RMW_QOS_POLICY_DURABILITY_TRANSIENT_LOCAL);
+  auto qos_sensor = rclcpp::QoS(rclcpp::SensorDataQoS());
 
   // === Publishers ===
   error_code_pub_ = create_publisher<std_msgs::msg::String>("error_code", 10);
   joint_state_pub_ = create_publisher<sensor_msgs::msg::JointState>("joint_states", 10);
   odom_pub_ = create_publisher<nav_msgs::msg::Odometry>("odom", qos_profile);
-  imu_pub_ = create_publisher<unitree_go::msg::IMUState>("imu", 10);
+  // imu_pub_ = create_publisher<unitree_go::msg::IMUState>("imu", 10);
+  imu_pub_ = create_publisher<unitree_go::msg::IMUState>("imu", qos_sensor);
+  imu_std_pub_ = create_publisher<sensor_msgs::msg::Imu>("imu/data", qos_sensor);
 
   // === Subscribers ===
   sport_state_sub_ = create_subscription<unitree_go::msg::SportModeState>(
@@ -157,6 +163,39 @@ void B2Driver::sportsModeCallback(const unitree_go::msg::SportModeState::SharedP
   std_msgs::msg::String error_msg;
   error_msg.data = std::to_string(msg->error_code);
   error_code_pub_->publish(error_msg);
+
+  unitree_go::msg::IMUState imu_u = msg->imu_state;
+  imu_pub_->publish(imu_u);
+
+  sensor_msgs::msg::Imu imu_std;
+  imu_std.header.stamp = now();
+  imu_std.header.frame_id = imu_frame_id_;  // "imu_link" por defecto
+
+  imu_std.orientation.w = msg->imu_state.quaternion[0];
+  imu_std.orientation.x = msg->imu_state.quaternion[1];
+  imu_std.orientation.y = msg->imu_state.quaternion[2];
+  imu_std.orientation.z = msg->imu_state.quaternion[3];
+
+  // Velocidad angular (rad/s)
+  imu_std.angular_velocity.x = msg->imu_state.gyroscope[0];
+  imu_std.angular_velocity.y = msg->imu_state.gyroscope[1];
+  imu_std.angular_velocity.z = msg->imu_state.gyroscope[2];
+
+  // Aceleración lineal (m/s^2)
+  imu_std.linear_acceleration.x = msg->imu_state.accelerometer[0];
+  imu_std.linear_acceleration.y = msg->imu_state.accelerometer[1];
+  imu_std.linear_acceleration.z = msg->imu_state.accelerometer[2];
+
+  // Covarianzas (ajusta si tienes especificaciones)
+  imu_std.orientation_covariance[0] = -1.0;
+  imu_std.angular_velocity_covariance[0] = 0.02;  // ejemplo
+  imu_std.angular_velocity_covariance[4] = 0.02;
+  imu_std.angular_velocity_covariance[8] = 0.02;
+  imu_std.linear_acceleration_covariance[0] = 0.04; // ejemplo
+  imu_std.linear_acceleration_covariance[4] = 0.04;
+  imu_std.linear_acceleration_covariance[8] = 0.04;
+
+  imu_std_pub_->publish(imu_std);
 
 }
 

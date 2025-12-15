@@ -37,6 +37,8 @@
 #include "std_srvs/srv/set_bool.hpp"
 
 #include "tf2_ros/transform_broadcaster.h"
+#include "sensor_msgs/msg/imu.hpp"
+
 
 // OJO: ruta relativa al include_directories() del CMakeLists
 #include "b2_driver/ros2_b2_sport_client.h"
@@ -120,7 +122,7 @@ private:
   rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr joint_state_pub_;
   rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr odom_pub_;
   rclcpp::Publisher<unitree_go::msg::IMUState>::SharedPtr imu_pub_;
-
+  rclcpp::Publisher<sensor_msgs::msg::Imu>::SharedPtr imu_std_pub_;
   // ==== Subscribers ====
   rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_sub_;
   rclcpp::Subscription<geometry_msgs::msg::Vector3>::SharedPtr euler_sub_;
@@ -142,6 +144,7 @@ private:
   // ==== Otros ====
   tf2_ros::TransformBroadcaster tf_broadcaster_;
   sensor_msgs::msg::Joy joy_state_;
+  std::string imu_frame_id_ = "imu_link";
 
   SportClient sport_client_;   // Envoltorio de la API AI Motion B2
 
