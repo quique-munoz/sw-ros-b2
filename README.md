@@ -56,10 +56,13 @@ En el workspace `~/prueba_b2` se utilizan, entre otros, los siguientes paquetes:
 * `b2_interfaces` → mensajes y servicios específicos para el B2.
 * `b2_driver` → nodo que hace de **puente** entre ROS 2 y el SDK Ai Motion.
 * `b2_bringup` → launch files para levantar todo (driver, TF, teleop, etc.).
+* `b2_navigation` → permite la navegación autónoma con NAV2, seleccionando slam := True/False
 * Paquetes auxiliares reutilizados:
 
   * `joy_estop` → capa de teleop con deadman + e-stop desde el mando.
   * `twist_mux` → multiplexor de velocidades (`cmd_vel`).
+  * `ublox_gps` → GPS dual o individual (ublox f9p)
+  * `ntrip_client` → correciones GPS
 
 ---
 
@@ -288,6 +291,38 @@ mando PS5 → /joy
           → joy_estop → /cmd_vel_teleop + /e_stop
           → twist_mux → /cmd_vel
           → (remap) → /b2/cmd_vel → B2Driver → SportClient.Move() → B2
+```
+
+---
+
+## 🧭 `b2_navigation`: Navegación con NAV2
+Para lanzar NAV2, al igual que con el Go2, existe la posibilidad de hacer slam o usar un mapa almacenado previamente:
+
+```bash
+ros2 launch b2_navigation navigation2.launch.py slam:=True
+
+ros2 launch b2_navigation navigation2.launch.py slam:=False map:=lab
+```
+
+### `ublox_gps` + `ntrip_client`
+El perro tiene dos gps (delantero y trasero) que se lanzan con:
+
+```bash
+ros2 launch ublox_gps dual_ublox_gps_node-launch.py 
+```
+
+Si se tiene conexión a internet se pueden aplicar las correcciones, para ello dentro del paquete `ntrip_client` es importante ajustar los parámtetros:
+
+```bash
+nano ntrip_client_launch.py 
+
+DeclareLaunchArgument('mountpoint',            default_value='BURG3'),
+
+DeclareLaunchArgument('username',              default_value='QuiqueMunoz'),
+
+DeclareLaunchArgument('password',              default_value='Itcl.2025'),
+
+ros2 launch ntrip_client ntrip_client_launch.py
 ```
 
 ---
