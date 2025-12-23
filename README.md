@@ -295,38 +295,6 @@ mando PS5 → /joy
 
 ---
 
-## 🧭 `b2_navigation`: Navegación con NAV2
-Para lanzar NAV2, al igual que con el Go2, existe la posibilidad de hacer slam o usar un mapa almacenado previamente:
-
-```bash
-ros2 launch b2_navigation navigation2.launch.py slam:=True
-
-ros2 launch b2_navigation navigation2.launch.py slam:=False map:=lab
-```
-
-### `ublox_gps` + `ntrip_client`
-El perro tiene dos gps (delantero y trasero) que se lanzan con:
-
-```bash
-ros2 launch ublox_gps dual_ublox_gps_node-launch.py 
-```
-
-Si se tiene conexión a internet se pueden aplicar las correcciones, para ello dentro del paquete `ntrip_client` es importante ajustar los parámtetros:
-
-```bash
-nano ntrip_client_launch.py 
-
-DeclareLaunchArgument('mountpoint',            default_value='BURG3'),
-
-DeclareLaunchArgument('username',              default_value='QuiqueMunoz'),
-
-DeclareLaunchArgument('password',              default_value='Itcl.2025'),
-
-ros2 launch ntrip_client ntrip_client_launch.py
-```
-
----
-
 ## 🔨 Compilación
 
 En el workspace `~/prueba_b2`:
@@ -366,6 +334,7 @@ ros2 node list | grep b2
 ### 2. Comprobar que el mando se ve en ROS 2
 
 ```bash
+ros2 launch b2_bringup teleop_joy.launch.py
 ros2 topic echo /joy
 ```
 
@@ -387,6 +356,37 @@ ros2 topic echo /b2/cmd_vel
 ```
 
 * Deberían reflejar el mismo `Twist` si no hay bloqueos por e-stop.
+
+
+### 3. Navegación con NAV2
+Para lanzar NAV2, al igual que con el Go2, existe la posibilidad de hacer slam o usar un mapa almacenado previamente:
+
+```bash
+ros2 launch b2_navigation navigation2.launch.py slam:=True
+
+ros2 launch b2_navigation navigation2.launch.py slam:=False map:=lab
+```
+
+### 4. Localización con `ublox_gps` + `ntrip_client`
+El perro tiene dos gps (delantero y trasero) que se lanzan con:
+
+```bash
+ros2 launch ublox_gps dual_ublox_gps_node-launch.py 
+```
+
+Si se tiene conexión a internet se pueden aplicar las correcciones, para ello dentro del paquete `ntrip_client` es importante ajustar los parámtetros:
+
+```bash
+nano ntrip_client_launch.py 
+
+DeclareLaunchArgument('mountpoint',            default_value='BURG3'),
+
+DeclareLaunchArgument('username',              default_value='QuiqueMunoz'),
+
+DeclareLaunchArgument('password',              default_value='Itcl.2025'),
+
+ros2 launch ntrip_client ntrip_client_launch.py
+```
 
 ---
 
